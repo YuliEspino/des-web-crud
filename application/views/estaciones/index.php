@@ -202,12 +202,14 @@
                         <?php if($estacion['ESTATUS_PAGO'] != 'Pagado'): ?>
                             <a href="<?= site_url('estaciones/cobrar/'.$estacion['ID']); ?>" class="btn btn-primary">Cobrar</a>
                         <?php endif; ?>
+
                     </div>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 </div>
+
 
 <!-- Modal para alerta -->
 <div id="modalAlerta" class="modal fade" tabindex="-1" role="dialog">
@@ -397,6 +399,68 @@ function startTimer(duration, display, estacionId) {
         <?php endforeach; ?>
     });
 
+    let correctPIN = '1234'; // Cambia esto por tu PIN real
+
+    function showPINModal(callback) {
+       $('#modalPIN').modal('show');
+       $('#pinSubmit').off('click').on('click', function() {
+        let enteredPIN = $('#pinInput').val();
+        if (enteredPIN === correctPIN) {
+            $('#pinError').hide();
+            $('#modalPIN').modal('hide');
+            callback(); // Ejecuta la acción si el PIN es correcto
+        } else {
+            $('#pinError').show();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+    <?php foreach ($estaciones as $estacion): ?>
+        document.querySelector('#pause-<?= $estacion['ID']; ?>').addEventListener('click', function() {
+            showPINModal(function() {
+                pauseTimer(<?= $estacion['ID']; ?>);
+            });
+        });
+
+        document.querySelector('#stop-<?= $estacion['ID']; ?>').addEventListener('click', function() {
+            showPINModal(function() {
+                stopTimer(<?= $estacion['ID']; ?>);
+            });
+        });
+
+        document.querySelector('#reset-<?= $estacion['ID']; ?>').addEventListener('click', function() {
+            showPINModal(function() {
+                resetTimer(<?= $estacion['ID']; ?>);
+            });
+        });
+    <?php endforeach; ?>
+});
+
+
 </script>
+
+<!-- Modal para el PIN de seguridad -->
+<div id="modalPIN" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ingrese el PIN de Seguridad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="password" id="pinInput" class="form-control" placeholder="Ingrese el PIN">
+                <p id="pinError" class="text-danger mt-2" style="display: none;">PIN incorrecto. Inténtalo de nuevo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="pinSubmit">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
